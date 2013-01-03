@@ -1,0 +1,269 @@
+/*
+	Panel.js
+*/
+
+@panel-default-width: 600px;
+@panel-fade-speed: 300ms;
+
+body._panel-open:not(.panel-no-overlay) { overflow: hidden; }
+
+body.panel-no-overlay .panel-overlay { display: none;}
+
+
+#_panel { // underscore to keep from overriding existing jQuery Panel plugin
+	position: fixed;
+	z-index: 1000;
+	top: 0;
+	right: 0;
+	height: 100%;
+	width: 100%;
+	overflow: hidden;
+
+	.panel-overlay {
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		background: rgba(255,255,255,.60);
+		z-index: 1000;
+		opacity: 0;
+		.transition(@panel-fade-speed);
+		
+		&.in { opacity: 1; }
+	}
+
+	
+	.panel-outer{
+		position: relative;
+		float: right;
+		height: 100%;
+		width: @panel-default-width;
+		max-width: 100%; // but we can't get bigger than the window width
+		.transition(@panel-fade-speed);
+	}
+
+	.panel-item {
+		position: absolute;
+		top: 0;
+		left: 102%;
+		z-index: 1001;
+		height: 100%;
+		width: 100%;
+		max-width: 100%; // but we can't get bigger than the window width
+		.box-sizing(border-box);
+		.transition(@panel-fade-speed, all, ease-in-out);
+		
+		&.in {left: 0%;}
+		
+		&.in:nth-child(2n) { padding-left: 25px;}
+		&.in:nth-child(3n) { padding-left: 50px;}
+		&.in:nth-child(4n) { padding-left: 75px;}
+		&.in:nth-child(5n) { padding-left: 100px;}
+		&.in:nth-child(6n) { padding-left: 125px;}
+		&.in:nth-child(7n) { padding-left: 150px;}
+		
+		
+		.panel-inner {
+			background-color: #f5f5f5;
+			.box-shadow(#555 0 0 15px);
+			height: 100%;
+		
+			
+			.panel-header {
+				position: relative;
+				background: #fff;
+				border-bottom: solid 1px #ddd;
+				height: 50px;
+				.box-sizing(border-box);
+				
+				> h3 {
+					padding: 0 35px 0 15px;
+					line-height: 50px;
+					font-size: 17px;
+					max-height: 100%;
+					overflow: hidden;
+					text-overflow: ellipsis;
+					white-space: nowrap;
+					
+					&:before {
+						margin-top: -2px;
+						margin-right: .4em;
+						opacity: 1;
+					}
+				}
+				
+				.panel-close {
+					height: 12px;
+					width: 12px;
+					position: absolute;
+					top: 50%;
+					right: 15px;
+					margin-top: -8px;
+					padding: 4px;
+					background: url('/common/img/icons/wireframe/black/16/delete_icon&16.png') no-repeat;
+					background-size: 12px;
+					cursor: pointer;
+					opacity: .3;
+					.transition(200ms);
+					
+					&:hover { opacity: 1;}
+				}
+				
+				.panel-spinner {
+					height: 32px;
+					width: 32px;
+					.rounded(3px);
+					background: rgba(0,0,0,.9);
+					position: absolute;
+					z-index: 10;
+					top: 100px;
+					left: 50%;
+					margin-left: -16px;
+					color: white;
+					display: none;
+				}
+				
+			}
+			
+			.panel-toolbar {
+				.gradient(#ddd,#ddd,#eee);
+				padding: 2px 5px;
+				border-bottom: solid 1px #bbb;
+				.box-shadow(#fff 0 1px 0 inset);
+				min-height: 31px;
+				
+				input.search {
+					background: #fff  url('/common/img/icons/wireframe/black/16/zoom_icon&16.png') 7px center no-repeat;
+					.rounded(14px);
+					font-size: 12px;
+					padding-left: 26px;
+				}
+				
+				.button,
+				.button-group {
+					margin: 3px 0 0 5px;
+				}
+				
+				.button.right,
+				.button-group.right {
+					margin: 3px 10px 0 0;
+				}
+				
+				.field.radio-buttons > label {
+					display: none;
+				}
+				
+				p, h4, h5 {
+					font-size: .9em;
+					color: #777;
+					margin: 9px 7px;
+				}
+			}
+			
+			.panel-content {
+				position: relative;
+				min-height: 200px;
+				width: 100%;
+				/* max-height: 800px; */
+				.box-sizing(border-box);
+				padding: 15px;
+				background: #fff;
+				overflow-y: auto;
+				overflow-x: hidden;
+				
+				/* temp */
+				.normal-text p {
+					line-height: 1.3em;
+					padding-top: .5em;
+					padding-bottom: 1em;
+				}
+			}
+	
+			.panel-footer {
+				//min-height: 40px;
+				position: relative;
+				padding: 14px 15px 15px;
+				margin-bottom: 0;
+				text-align: right;
+				background-color: #f5f5f5;
+				border-top: 1px solid #ddd;
+				-webkit-border-radius: 0 0 6px 6px;
+				-moz-border-radius: 0 0 6px 6px;
+				border-radius: 0 0 6px 6px;
+				
+				-webkit-box-shadow: inset 0 1px 0 #ffffff;
+				   -moz-box-shadow: inset 0 1px 0 #ffffff;
+				        box-shadow: inset 0 1px 0 #ffffff;
+				
+				.button {margin-left: 15px;}
+				.button.left {
+					margin-left: 0;
+					margin-right: 15px;
+				}
+			}
+
+		}
+		
+	}
+	
+	
+	.panel-content {
+	
+		ul.list.simple {
+			margin: 15px -15px -15px -15px;
+		
+			> li{
+				border-bottom: solid 1px #ddd;
+				padding: 15px 15px;
+				
+				&.label-separator {
+					position: relative;
+					z-index: 10;
+					background: #f1f1f1;
+					padding: 5px 15px;
+					text-transform: uppercase;
+					font-weight: bold;
+					font-size: .8em;
+					.box-shadow(#ccc 0 1px 3px);
+					border-bottom: solid 1px #fff;
+					
+					&.secondary {
+						z-index: 9;
+						text-transform: none;
+						padding-top: 15px;
+						padding-bottom: 10px;
+						background: none;
+						border-top: solid 4px #ddd;
+						border-bottom: solid 1px #ddd;
+						.box-shadow(none);
+						font-size: 1.1em;
+					}					
+					
+				}
+				
+				&.label-separator + .label-separator { border-top: none; }
+				
+				&.active {
+					border-left: solid 3px @blue;
+					padding-left: 12px;
+				}
+				
+				.highlight {
+					font-weight: bold;
+					font-style: italic;
+				}
+				
+				> .count {
+					display: inline-block;
+					width: 30px;
+				}
+				
+			}
+		}
+		
+		
+		ul.list.simple:first-child { margin-top: -15px; }
+	
+	}
+	
+	
+} // #_panel
