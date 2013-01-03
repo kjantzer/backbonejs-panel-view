@@ -16,4 +16,3 @@ Panel.TOP_H	= 50;		// height of top title
 
 // @codekit-append 'Panel.ViewController.js'
 // @codekit-append 'Panel.View.js'
-// @codekit-append 'Panel.test.js'

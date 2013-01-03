@@ -16,7 +16,6 @@ Panel.TOP_H	= 50;		// height of top title
 
 // @codekit-append 'Panel.ViewController.js'
 // @codekit-append 'Panel.View.js'
-// @codekit-append 'Panel.test.js'
 
 /* **********************************************
      Begin Panel.ViewController.js
@@ -426,56 +425,3 @@ Panel.View = Backbone.View.extend({
 	}
 	
 })
-
-/* **********************************************
-     Begin Panel.test.js
-********************************************** */
-
-
-var testPanel
-var testPanel2
-
-
-var TestPanel = Panel.View.extend({
-	
-	title: 'Teset',
-	w: 400,
-	
-	init: function(){
-		
-	},
-	
-	render: function(){
-		this.$content.html( 'testing')
-	},
-	
-	toolbar: function(){
-		//return this.SeriesList.$top; // grab the $top div from the SeriesList view
-	},
-	
-	footer: false
-});
-
-
-
-
-
-
-var TestPanel2 = Panel.View.extend({
-	
-	title: 'Test Panel2',
-	w: 400
-	
-});
-
-
-
-setTimeout(function(){
-	testPanel = new TestPanel();
-	testPanel2 = new TestPanel2();
-}, 300)
-
-
-setTimeout(function(){
-	//testPanel.open();
-}, 700);
