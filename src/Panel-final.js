@@ -142,6 +142,11 @@ Panel.ViewController = Backbone.View.extend({
 			this.panels[indx].close()
 	},
 	
+	// close panels above the given panel - this is called by a panel when it is told to open but is already open
+	closeAbove: function(panel){
+		this.panels[panel.index+1].close()
+	},
+	
 	// set width of the view controller to the same width as the active (topmost) panel
 	setWidth: function(){
 		
@@ -178,15 +183,13 @@ $(function() {
 /*
 	Panel View
 	
-	this.init - hook into the intialize process
-	
 	this.render - fn - set the panel content (this.$content)
 	this.toolbar - fn - set a toolbar 
 	this.footer - fn, string, array - set the footer
 		
 		fn that returns html
 		array for a list of buttons
-			[ {label: 'Button Title', className: 'blue save-it'}]
+			[ {label: 'Button Title', className: 'primary save-it'}]
 		string - speciality shortcut - use "close" to automatically add a close button
 		
 	
@@ -198,29 +201,50 @@ Panel.View = Backbone.View.extend({
 	tagName: 'li',
 	
 	//className: 'panel-item',
+	//_view: function(){ return new Backbone.View(); }, // if this is set, it will append this view to the content
 	
 	title	: '',	// title of panel
 	icon	: '',	// title icon ("icon-" is added so "user" will be "icon-user")
 	w		: 600,	// width
 	
-	template: $('#template-panel-view').html(),
+	_template: $('#template-panel-view').html(),
 	
 	defaultEvents: {
 		'click': 'closeUnder',						 // look for clicks on panels underneath
 		'click .panel-close': 'close',				 // "x" close button in header
-		'click .panel-footer .button.close': 'close' // close button in the footer
+		'click .panel-footer .button.panel-close': 'close' // close button in the footer
 	},
 	
+	constructor: function(data, opts){
+	
+		// if the initialize method has been overridden, patch it to make sure Panel.View.initialize is called first
+		if( this.initialize != Panel.View.prototype.initialize ){
+			
+			var that = this;
+			var init = this.initialize; // cache the override method
+			
+			this.initialize = function(){
+				Panel.View.prototype.initialize.apply(that, arguments) // call real initialize first
+				init.apply(that, arguments); // then we can call the override initalize
+			}
+		}
+		
+		// call normal backbone constructor
+		Backbone.View.prototype.constructor.call(this, data);
+	},
+	
+	// this method will be called no matter what, even if it is overridden
 	initialize: function(opts){
 	
 		this.events = _.extend({}, this.events||{}, this.defaultEvents);
 		
-		this.$el.html( this.template ).addClass('panel-item');
+		this.$el.html( this._template ).addClass('panel-item');
 		
-		this.$title = this.$el.find('.panel-title');
-		this.$toolbar = this.$el.find('.panel-toolbar');
-		this.$content = this.$el.find('.panel-content');
-		this.$footer = this.$el.find('.panel-footer');
+		this.$header	= this.$('.panel-header');
+		this.$title		= this.$('.panel-title');
+		this.$toolbar	= this.$('.panel-toolbar');
+		this.$content	= this.$('.panel-content');
+		this.$footer	= this.$('.panel-footer');
 		
 		this.setWidth();
 		this.setTitle();
@@ -231,16 +255,19 @@ Panel.View = Backbone.View.extend({
 		
 		if( !this.footer )
 			this.$footer.hide();
-			
+		
+		if( this._view ){
+			this.view = _.isString(this._view) ? new (_.getObjectByName(this._view))() : this._view();
+			this.view.on('panel:close', this.close, this);
+			this.$content.append( this.view.el );
+		}
+		
 		if( this.init )
 			this.init();
 	},
 	
 	_render: function(){
 	
-		this.$toolbar.html('');
-		this.$footer.html('');
-		
 		this.render();
 		this._toolbar();
 		this._footer();
@@ -250,7 +277,15 @@ Panel.View = Backbone.View.extend({
 		return this;	
 	},
 	
+	render: function(){
+		if( this.view && this.view instanceof Backbone.View )
+			this.view.render();
+	},
+	
 	_toolbar: function(){
+		
+		this.$toolbar.html('');
+		
 		if( this.toolbar )
 			this.$toolbar.append( this.toolbar() );	
 	},
@@ -259,13 +294,18 @@ Panel.View = Backbone.View.extend({
 	
 	_footer: function(){		
 		
+		this.$footer.html('');
+		
 		if( !this.footer ) return;
+
+		//if a function set this.footer to the return 
+		if( _.isFunction(this.footer) )
+			this.footer = this.footer();
 		
 		// if footer is "close", add a close button
 		if( this.footer === 'close' ){
 			this.$footer.append( this.footerBtn('close') );	
-			
-			
+		
 		// if an array, create buttons for each array item
 		}else if( _.isArray( this.footer ) ){
 			
@@ -275,25 +315,31 @@ Panel.View = Backbone.View.extend({
 		
 		// string or jQuery object
 		}else if( _.isString(this.footer) || _.isObject(this.footer) ){
-			this.$footer.append( this.footer );	
-		
+			this.$footer.append( this.footer );
+
 		// function that returns html
 		}else{
 			this.$footer.append( this.footer() );	
 		}
 	},
+
 	
 	footerBtn: function(opts){
 	
+		if( _.isFunction(opts) )
+			opts = opts.call(this);
+	
 		if( opts === 'close' )
-			opts = {label: 'Close', className: 'white close right'};
+			opts = {label: 'Close', className: 'white panel-close right'};
+		else if( opts === 'cancel' )
+			opts = {label: 'Cancel', className: 'white pane-close right'};
 	
 		opts = _.extend({
 			label: 'Button',
 			className: 'white'
 		}, opts);
 		
-		return $('<a class="button '+opts.className+'">'+opts.label+'</a>');
+		return $('<a class="button btn btn-default '+opts.className+'">'+opts.label+'</a>');
 	},
 	
 	/*
@@ -302,8 +348,11 @@ Panel.View = Backbone.View.extend({
 	open: function(){
 		
 		// if we have a panel index, then this panel has already been added and opened
-		if( this.panelIndex )
+		if( this.index !== null && this.index >= 0 ){
+			this._render()
+			panel.viewController.closeAbove(this)
 			return;
+		}
 		
 		// add this panel to the view controller
 		panel.viewController.addPanel(this);
@@ -360,6 +409,7 @@ Panel.View = Backbone.View.extend({
 	*/
 	setWidth: function(){
 		this.$el.width( this.w );
+		this.$content.width( this.w );
 	},
 	
 	/*
@@ -369,7 +419,7 @@ Panel.View = Backbone.View.extend({
 	
 		if( newTitle ) this.title = newTitle;
 	
-		this.$title.html(this.title).attr('title', this.title);
+		this.$title.html(this.title).attr('title', _.stripTags(this.title));
 	},
 	
 	/*
@@ -390,7 +440,7 @@ Panel.View = Backbone.View.extend({
 	*/
 	resize: function(){
 		
-		var bodyH = $('body').height();
+		var bodyH = $(window).height();
 		var outerH = Panel.TOP_H + this.toolbarH() + this.footerH();
 		
 		var h = bodyH - outerH;
@@ -417,11 +467,19 @@ Panel.View = Backbone.View.extend({
 		_.defer( _.bind(function(){
 			
 			if(doSpin !== false)
-				this.$toolbar.spin('small')
+				this.$header.spin('small', null, false)
 			else
-				this.$toolbar.spin(false)
+				this.$header.spin(false)
 			
 		},this))
+	},
+	
+	clearContent: function(){
+		this.$content.html('');
+	},
+	
+	append: function(content){
+		this.$content.append(content);
 	}
 	
 })

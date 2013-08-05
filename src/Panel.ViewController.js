@@ -119,6 +119,11 @@ Panel.ViewController = Backbone.View.extend({
 			this.panels[indx].close()
 	},
 	
+	// close panels above the given panel - this is called by a panel when it is told to open but is already open
+	closeAbove: function(panel){
+		this.panels[panel.index+1].close()
+	},
+	
 	// set width of the view controller to the same width as the active (topmost) panel
 	setWidth: function(){
 		

@@ -3,7 +3,7 @@ BackboneJS: Panel View
 
 Sliding panel views that stack. Complete with optional toolbar and footer. Automatically resizes when window size changes.
 
-![Preview](http://cl.ly/image/2w3O1x0J372v/backbonejs-panel-preview.png)
+![Preview](http://i.imgur.com/5q5IF5u.png)
 
 ## Requires
 * LESS CSS

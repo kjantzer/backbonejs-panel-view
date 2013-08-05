@@ -1,0 +1,127 @@
+<html>
+<head>
+
+<title>Backbone.js Panel View</title>
+
+<!-- Backbone.js Dependencies -->
+<script src="lib/jquery.min.js"></script>
+<script src="lib/underscore.min.js"></script>
+<script src="lib/underscore.string.min.js"></script>
+<script src="lib/backbone.min.js"></script>
+<script type="text/javascript">
+	// mixin underscore.string
+	_.mixin(_.str.exports());
+</script>
+
+<!-- Bootstrap 3 - http://getbootstrap.com -->
+<link href="lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+
+<!-- Panel View script -->
+<link href="style.css" rel="stylesheet" type="text/css">
+<!-- JS TEMPLATES ======================================================================== -->
+<!-- Panel View Controller -->
+	<script id="template-panel-controller" type="text/html">
+	<div class="panel-overlay"></div>
+	<ul class="panel-outer"></ul>
+	</script>
+
+<!-- Panel View -->
+	<script id="template-panel-view" type="text/html">
+	<div class="panel-inner">
+		
+		<div class="panel-header">
+			<div class="panel-close"></div>
+			<h3 class="panel-title"></h3>
+		</div>
+		
+		<div class="panel-toolbar clearfix"></div>
+		<div class="panel-content"></div>
+		<div class="panel-footer clearfix"></div>
+	
+	</div>
+	</script>
+<!-- ==================================================================================== -->
+<script src="src/Panel-final.js"></script>
+
+</head>
+<body>
+
+<a href="https://github.com/kjantzer/backbonejs-panel-view"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a>
+
+<div class="container">
+	<div class="col-lg-6 col-lg-offset-3">
+	
+	<h1>Backbone.js Panel View</h1>
+	<p>Responsive sliding panel views that stack. Complete with optional toolbar and footer. Automatically resizes when window size changes.</p>
+	<br>
+	
+	
+	<div id="demos" class="clearfix panel">
+		
+		<a class="btn btn-primary" href="javascript:panel1.open()">Open Panel 1</a>
+		<a class="btn btn-primary" href="javascript:panel2.open()">Open Panel 2</a>
+		
+	</div>
+
+	<hr>
+	
+	<small>Built by Kevin Jantzer, Blackstone Audio Inc.</small>
+	
+	</div>
+</div>
+
+<script type="text/javascript">
+$(function() {
+
+	window.Panel1 = Panel.View.extend({
+		
+		title: 'Panel 1 Title',
+		
+		events: {
+			'click .open-panel': 'openPanel'
+		},
+		
+		init: function(){},
+		
+		// this is called everytime the panel opens: Panel1.open()
+		render: function(){
+			this.$content.html('<p>Panel content here. <a class="panel-close">Close this panel</a></p><hr><a class="btn btn-primary open-panel">Open Panel 2</a>');
+			return this;
+		},
+		
+		openPanel: function(){
+			panel2.open();
+		}
+	})
+	
+	
+	window.Panel2 = Panel.View.extend({
+		
+		title: 'Panel 2 Title',
+		w: 400,
+		
+		render: function(){
+			this.$content.html('<p>Panel 2 content here</p>');
+			return this;
+		},
+		
+		toolbar: function(){
+			return $('<div>\
+						<p>Panel Toolbar</p>\
+						<p class="divider"></p>\
+						<p>Add controls here</p>\
+					</div>')
+		},
+		
+		footer: false
+	})
+	
+	
+	window.panel1 = new Panel1();
+	window.panel2 = new Panel2();
+
+});
+</script>
+
+</body>
+</html>
