@@ -150,7 +150,7 @@ Panel.View = Backbone.View.extend({
 		if( opts === 'close' )
 			opts = {label: 'Close', className: 'white panel-close right'};
 		else if( opts === 'cancel' )
-			opts = {label: 'Cancel', className: 'white pane-close right'};
+			opts = {label: 'Cancel', className: 'white panel-close right'};
 	
 		opts = _.extend({
 			label: 'Button',
